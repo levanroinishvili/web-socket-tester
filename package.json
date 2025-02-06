@@ -1,0 +1,16 @@
+{
+  "name": "websocket-tester",
+  "version": "1.0.0",
+  "description": "Simple WebSocket Server",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "node index.js"
+  },
+  "author": "Levan Roinishvili",
+  "license": "ISC",
+  "dependencies": {
+    "chalk": "^5.4.1",
+    "ws": "^8.18.0"
+  }
+}

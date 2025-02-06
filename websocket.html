@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Socket Tester</title>
+    <style>
+        /* #screen {   } */
+        #screen .source {
+            font-weight: bold;
+        }
+        #screen .message {
+            color: blue;
+            margin-block-end: 16px;
+        }
+        #connection-count {
+            font-weight: bold;
+            font-size: 14px;
+        }
+    </style>
+    <script>
+        let sockets = []
+        function connect(uri, name = 'WebSocket') {
+            webSocket = new WebSocket(uri) // Use the correct URL and port
+            webSocket.onopen = () => {
+                sockets.push(webSocket)
+                updateConnectionCount()
+            }
+            webSocket.onclose = () => updateConnectionCount()
+            webSocket.onerror = console.warn
+            webSocket.onmessage = message => {
+                show(name, message.data)
+                console.log(`%c${name}%c:`, 'color:green;', 'color:yellow', message.data)
+            }
+            return webSocket
+        }
+        function disconnectAll() {
+            sockets.forEach(socket => socket.close())
+            sockets = []
+            updateConnectionCount()
+        }
+        function sendToAll(message) {
+            sockets.forEach(socket => socket.send(message))
+            show('Us', message)
+        }
+        function show(source, message) {
+            const src = document.createElement('div')
+            const msg = document.createElement('div')
+            src.innerHTML = `${source}`
+            msg.innerHTML = `${message}`
+            src.classList.add('source')
+            msg.classList.add('message')
+            const screen = document.getElementById('screen')
+            screen.prepend(src,msg)
+        }
+        function updateConnectionCount() {
+            document.getElementById('connection-count').innerText = sockets.reduce((total) => total + 1, 0)
+        }
+    </script>
+</head>
+
+<body>
+    <div>
+        Connections: <span id="connection-count">0</span>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(2,max-content);gap:8px;margin:16px;">
+        URI: <input id="uri" value="http://localhost:8080">
+        Name: <input id="name" value="WebSocket">
+        <button onclick="connect(document.getElementById('uri').value, document.getElementById('name').value)">Connect</button>
+        <button onclick="disconnectAll()">Disconnect All</button>
+    </div>
+    <hr />
+    <div style="display:grid;grid-auto-flow:row;row-gap:8px;margin:16px;">
+        <textarea id="message" rows="5"></textarea>
+        <button onclick="sendToAll(document.getElementById('message').value)" style="justify-self:start;">Send to All</button>
+    </div>
+
+    <div id="screen"></div>
+
+</body>
+
+</html>
