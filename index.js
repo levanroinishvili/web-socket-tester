@@ -6,14 +6,22 @@ import readline from 'node:readline';
 const DEFAULT_PORT = 8080
 const port = await prompt(`Select port: ${chalk.grey(8080)} `) || DEFAULT_PORT
 
-const wss = new WebSocketServer({ port });
+const wss = new WebSocketServer({
+    port,
+    handleProtocols: protocols => { // Only called if has at least one element
+        const ps = Array.from(protocols) // Must have at least one element
+        const chosen = ps.at(-1)
+        console.log(chalk.yellow(`Chose protocol "${chosen}" from`), ps.map(p => `"${p}"`).join(', '))
+        return chosen
+    },
+});
 console.log(chalk.green(`Listening on port`), port)
 
 let connectedSockets = []
 
 wss.on('connection', ws => {
     connectedSockets = [...connectedSockets, ws]
-    console.log(chalk.green(`Connection received on port ${port}`))
+    console.log(chalk.green(`Connection on port ${port}`))
     ws.on('message', data => {
         console.log()
         console.log('Message:\n%s', chalk.yellow(data));
